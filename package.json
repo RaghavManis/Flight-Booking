@@ -1,0 +1,22 @@
+{
+  "name": "basic-template-nodejs",
+  "version": "1.0.0",
+  "description": "basic nodejs template ",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js"
+  },
+  "author": "raghavmanish",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "http-status-code": "^2.1.0",
+    "http-status-codes": "^2.3.0",
+    "mysql2": "^3.11.3",
+    "nodemon": "^3.1.7",
+    "sequelize": "^6.37.4",
+    "sequelize-cli": "^6.6.2",
+    "winston": "^3.15.0"
+  }
+}
