@@ -1,70 +1,67 @@
-const {Logger} = require("../config") ;
+const { StatusCodes } = require("http-status-codes");
+const AppError = require("../utills/error/app-error");
 
 
-class crudrepository{
+class crudRepository{
     constructor(model){
         this.model = model ;
     }
 
     async create(data){ // data will be in object form 
-        // try {
-            console.log("inside crud repo in crete function " , data) ;
+            // console.log("inside crud repo(create function)") ;
+            // console.log(data) ;
             const response = await this.model.create(data) ;
-            // console.log("object") ;
+            // console.log("respone in crud repo ------ "+response) ;
             return response ;
-        // } catch (error) {
-        //     Logger.info("something went wrong in the crud repository : create") ;
-        //     throw error ;
-        // }
-    }
-
-    async destroy(data){ // data will be in object form 
-        try {
-            const response = await this.model.destroy({
-                where:{
-                    id:data ,
-                }
-            }) ;
-            return response ;
-        } catch (error) {
-            Logger.info("something went wrong in the crud repository : destroy") ;
-            throw error ;
         }
-    }
-
-    async get(id){ // data will be in object form 
-        try {
-            const response = await this.model.findByPk(id) ;
-            return response ;
-        } catch (error) {
-            Logger.info("something went wrong in the crud repository : get") ;
-            throw error ;
+        
+    async destroy(data) {
+        const response = await this.model.destroy({
+            where: {
+                id: data
+            }
+        });
+        // console.log("response in crud repo outside the if condition  --> ",response);
+        if(response == 0){
+            // console.log("response in crud repo inside condition of not present --> ",response);
+            throw new AppError("airplane you requested for deleting is not on the database" , StatusCodes.NOT_FOUND) ;  
         }
+        return response;
+    }
+    
+    async get(id){ 
+        const response = await this.model.findByPk(id) ;
+        if(!response){
+            throw new AppError("data you are looking for is not in the database" , StatusCodes.NOT_FOUND) ;
+        }
+        return response ;
     } 
     
     async getAll(){ // data will be in object form 
-        try {
-            const response = await this.model.findAll() ;
-            return response ;
-        } catch (error) {
-            Logger.info("something went wrong in the crud repository : getAll") ;
-            throw error ;
-        }
+        const response = await this.model.findAll() ;
+        // console.log("inside getAll of crud repo -----" ) ;
+        // console.log("typeof response in getAll in crud repo ---" + typeof response) ;
+        // console.log("response in getAll in crud repo -------"+ response) ;
+        return response ;
     }
-    
-    async update(data , id){
-        try {
-            const response = await this.model.update(data , {
-                where:{
-                    id:id ,
-                }
-            })
-            return response ;
-        } catch (error) {
-            Logger.info("something went wrong in the crud repository : update "); 
-            throw error ;
+    async update(data , id) { 
+        const [updatedRows] = await this.model.update(data, {
+            where: {   
+                id: id ,
+            }
+        });
+        // console.log("type of updated rows : " + typeof updatedRows + ",,, value = " + updatedRows) ;
+        if (updatedRows === 0) {
+            // If no rows were updated, throw a NOT FOUND error
+            console.log("handling the error") ;
+            throw new AppError("The data  you want to update is not present in the database", StatusCodes.NOT_FOUND);
         }
+       
+        // Fetch the updated airplane and return it
+        const updatedData = await this.model.findByPk(id);
+        // console.log(typeof updatedData); 
+        return updatedData;
     }
 }
 
-module.exports = crudrepository ;
+module.exports = crudRepository ;
