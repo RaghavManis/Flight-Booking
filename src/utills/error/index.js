@@ -1,4 +1,4 @@
 
-modeule.exports = {
+module.exports = {
     AppError : require("./app-error")
 }

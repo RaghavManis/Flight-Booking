@@ -7,4 +7,5 @@ dotenv.config() ;   // This line tells dotenv to load the contents of the .env f
 
 module.exports = {
     PORT : process.env.PORT ,
+    FLIGHT_SERVICE : process.env.FLIGHT_SERVICE ,
 }

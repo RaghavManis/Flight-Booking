@@ -9,6 +9,7 @@
   "author": "raghavmanish",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.7.7",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "http-status-code": "^2.1.0",

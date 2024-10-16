@@ -17,11 +17,6 @@ async function createAirplane(req , res){
                 .status(error.statusCode)
                 .json(ErrorResponse) ;
     }
-    // catch (error) {
-    //     ErrorResponse.error = error;
-    //     const statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR; // Default to 500 if statusCode is undefined
-    //     return res.status(statusCode).json(ErrorResponse);
-    // }
 }
 
 module.exports = {
