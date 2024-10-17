@@ -8,12 +8,12 @@ class crudRepository{
     }
 
     async create(data){ // data will be in object form 
-            // console.log("inside crud repo(create function)") ;
-            // console.log(data) ;
-            const response = await this.model.create(data) ;
-            // console.log("respone in crud repo ------ "+response) ;
-            return response ;
-        }
+        // console.log("inside crud repo(create function)") ;
+        // console.log(data) ;
+        const response = await this.model.create(data) ;
+        // console.log("respone in crud repo ------ "+response) ;
+        return response ;
+    }
         
     async destroy(data) {
         const response = await this.model.destroy({
@@ -29,13 +29,13 @@ class crudRepository{
         return response;
     }
     
-    async get(id){ 
-        const response = await this.model.findByPk(id) ;
-        if(!response){
-            throw new AppError("data you are looking for is not in the database" , StatusCodes.NOT_FOUND) ;
-        }
-        return response ;
-    } 
+    // async get(id){ 
+    //     const response = await this.model.findByPk(id) ;
+    //     if(!response){
+    //         throw new AppError("data you are looking for is not in the database" , StatusCodes.NOT_FOUND) ;
+    //     }
+    //     return response ;
+    // } 
     
     async getAll(){ // data will be in object form 
         const response = await this.model.findAll() ;

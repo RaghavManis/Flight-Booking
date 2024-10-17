@@ -1,4 +1,3 @@
-
 const axios = require("axios");
 const db = require("../models");
 const {ServerConfig} = require("../config") ;
@@ -7,6 +6,7 @@ const {StatusCodes} = require("http-status-codes") ;
 const {BookingRepository} = require("../repositories") ;
 const serverConfig = require("../config/server-config");
 const {Enums} = require("../utills/common/") ;
+const { log } = require("winston");
 const {INITIATED , CANCELLED , BOOKED , PENDING} =Enums.BOONIKG_STATUS ;
 
 const bookingRepository = new BookingRepository() ;
@@ -42,8 +42,52 @@ async function createBooking(data){
     }
 }
 
+async function makePayments(data){
+    const transaction = await db.sequelize.transaction() ; // again making this api a transaction so that no effects will occur if any error occur in between the execution of this api
+
+    try {
+        console.log("bookingId inside try in booking service --> " + data.bookingId) ;
+        const bookingDetails = await bookingRepository.get(data.bookingId ,  transaction) ; // remeber the way of applying the transaction at crud level , same syntax for transaction will be use in booking repo or crud repo if needed 
+        
+        console.log("inside try block of make payments in booking service ") ;
+        // A BUNCH OF CROSS CHECKING OF USER TO VERIFY THE DETAILS BEFORE PAYMENT 
+
+        if(bookingDetails.userId != data.userId){
+            throw new AppError("The user corresponding to the booking doesnt match" , StatusCodes.BAD_REQUEST) ;
+        }
+        
+        if(bookingDetails.status == CANCELLED){
+            throw new AppError("Your booking is expired" , StatusCodes.BAD_REQUEST ) ;
+        }
+
+        const bookingTime = new Date(bookingDetails.createdAt) ;
+        const currentTime = new Date() ;
+        if(currentTime-bookingTime > 300000){
+            await bookingRepository.update(data.bookingId , {status : CANCELLED} , transaction) ;
+            throw new AppError("aahahaa ! Your booking is expired" , StatusCodes.BAD_REQUEST) ;
+        }
+
+        if(bookingDetails.totalCost != data.totalCost){
+            throw new AppError("Dont't try to be smart ....please enter the right amount " , StatusCodes.BAD_REQUEST) ;
+        }
+
+        // if(bookingDetails.userId != data.userId){
+        //     throw new AppError("The user corresponding to the booking doesnt match" , StatusCodes.BAD_REQUEST) ;
+        // }
+
+        // now we assume that we are ready to make payment
+        await bookingRepository.update(data.bookingId , {status : BOOKED} , transaction) ;
+
+        await transaction.commit() ;
+    } catch (error) {
+        console.log(error);
+        console.log("error iniside make payment inside booking service is --> " + error ) ;
+        await transaction.rollback() ;
+        throw error ;
+    }
+}
 module.exports = {
     createBooking,
-    // makePayments ,
+    makePayments ,
 };
    
