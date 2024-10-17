@@ -7,14 +7,15 @@ async function createBooking(req , res){
         const booking = await BookingService.createBooking({
             flightId : req.body.flightId ,
             noOfSeats : req.body.noOfSeats ,
+            userId : req.body.userId ,
         })
-        console.log("inside try block of booking controller") ;
+        console.log("inside try block of booking controller ") ;
         SuccessResponse.data = booking ;
         return res.status(StatusCodes.CREATED)
                   .json(SuccessResponse)
     } catch (error) {
-        // console.log("inside booking controller , succesResponse-->" + SuccessResponse , "   , errorResponse --> " + ErrorResponse) ;
-        // console.log("error in booking controller is ---> " + error.statusCode) ;
+        console.log("inside booking controller , succesResponse-->" + SuccessResponse , "   , errorResponse --> " + ErrorResponse) ;
+        console.log("error in booking controller is ---> " + error.statusCode) ;
         ErrorResponse.error = error ;
         return res
                 .status(error.statusCode)       // why can't we use error.status when using promises in booking services 
@@ -26,3 +27,13 @@ async function createBooking(req , res){
 module.exports = {
     createBooking ,
 }
+
+// {
+//     flightId : req.body.flightId ,
+//     noOfSeats : req.body.noOfSeats ,
+// }
+// {
+//     flightId : req.body.flightId ,
+//     noOfSeats : req.body.noOfSeats ,
+//     totalCost: totalBillingAmount
+// }
