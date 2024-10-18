@@ -23,17 +23,17 @@ async function createBooking(data){
 
         const totalBillingAmount = data.noOfSeats * flightData.price ;
         const bookingPayLoad = {...data , totalCost : totalBillingAmount} ;// ... is used to add all the values of data object inside bookingPayLoad
-        const booking = await bookingRepository.create(bookingPayLoad , transaction) ;  // we have to pass the transaction eack time when we go further inside the folder structure 
+        const booking = await bookingRepository.create(bookingPayLoad , transaction) ;  // we have to pass the transaction each time when we go further inside the folder structure 
         // const booking = await bookingRepository.createBooking(bookingPayLoad , transaction) ;
         // i think createBooking should be used
         // (both code are working => we can execute a function which is inside the another function directly by calling that function 
         // (it's my conclusion , what is 100% true i don't know ))
-
+        console.log("inside try block in createBooking of booking service ") ;    
         await axios.patch(`${serverConfig.FLIGHT_SERVICE}/api/get/flights/${data.flightId}/seats` , { // isi line of code ke vjh se seats update ho ja rhh flight me whenever we just query the seats avalability in booking
             seats : data.noOfSeats
-        })
+        })   
 
-        await transaction.commit() ;
+        await transaction.commit() ;  
         return booking ;  
     } catch (error) {
         console.log("error inside the booking service ---> " + error);
@@ -83,6 +83,7 @@ async function makePayments(data){
         await bookingRepository.update(data.bookingId , {status : BOOKED} , transaction) ;
 
         await transaction.commit() ;
+        return bookingDetails ;
     } catch (error) {
         console.log(error);
         console.log("error iniside make payment inside booking service is --> " + error ) ;
@@ -94,7 +95,7 @@ async function makePayments(data){
 async function cancelBooking(bookingId){
     const transaction = await db.sequelize.transaction() ;
     try {
-        const bookingDetails = await bookingRepository.get(bookingId , transaction ) ;
+        const bookingDetails = await bookingRepository.get(bookingId , transaction ) ;   
 
         if(bookingDetails.status == CANCELLED){
             await transaction.commit() ;
