@@ -6,7 +6,7 @@ const {StatusCodes} = require("http-status-codes") ;
 const {BookingRepository} = require("../repositories") ;
 const serverConfig = require("../config/server-config");
 const {Enums} = require("../utills/common/") ;
-const { log } = require("winston");
+// const { log } = require("winston");
 const {INITIATED , CANCELLED , BOOKED , PENDING} =Enums.BOONIKG_STATUS ;
 
 const bookingRepository = new BookingRepository() ;
@@ -116,8 +116,19 @@ async function cancelBooking(bookingId){
     }
 }
 
+async function cancelOldBookings(){
+    try {
+        const time = new Date(Date.now() - 1000 * 300) ; //date object before 5 minutes (1000 is mili second and 300 is in seconds )
+        const response = await bookingRepository.cancelOldBookings(time) ;
+        return response ;
+    } catch (error) {
+        console.log(error) ;// why not you handling the error ;
+    }
+}
+
 module.exports = {
     createBooking,
     makePayments ,
+    cancelOldBookings ,
 };
    

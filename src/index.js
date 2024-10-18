@@ -1,7 +1,7 @@
 const express = require("express") ;
 const {ServerConfig , Logger} = require("./config") ;
 const router = require("./routes") ;
-// const { cli } = require("winston/lib/winston/config");
+const CRON = require("./utills/common/cron-jobs") ;
 const app = express() ;
 
 app.use(express.json()) ;
@@ -11,6 +11,7 @@ app.listen(ServerConfig.PORT , ()=>{
     // console.log(process) ;
     console.log(`server is succesfully started at port no ${ServerConfig.PORT}`) ;
     // Logger.info("server succesfully started") ;
+    CRON() ;
 })
 // console.log("inside main index.js")
 app.use("/api" , router) ;
