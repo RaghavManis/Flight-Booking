@@ -63,7 +63,11 @@ async function makePayments(data){
         const bookingTime = new Date(bookingDetails.createdAt) ;
         const currentTime = new Date() ;
         if(currentTime-bookingTime > 300000){
-            await bookingRepository.update(data.bookingId , {status : CANCELLED} , transaction) ;
+            await cancelBooking(data.bookingId) ;
+
+            // code before implementation of the cancel booking(untill here we are only able to update the booking status in booking model but
+            // we are not increasing the no of seats in flight model )
+            // await bookingRepository.update(data.bookingId , {status : CANCELLED} , transaction) ; 
             throw new AppError("aahahaa ! Your booking is expired" , StatusCodes.BAD_REQUEST) ;
         }
 
@@ -86,6 +90,32 @@ async function makePayments(data){
         throw error ;
     }
 }
+
+async function cancelBooking(bookingId){
+    const transaction = await db.sequelize.transaction() ;
+    try {
+        const bookingDetails = await bookingRepository.get(bookingId , transaction ) ;
+
+        if(bookingDetails.status == CANCELLED){
+            await transaction.commit() ;
+            return true ;
+        }
+
+        await axios.patch(`${serverConfig.FLIGHT_SERVICE}/api/get/flights/${bookingDetails.flightId}/seats` , {
+            seats : bookingDetails.noOfSeats ,
+            dec : "false" ,
+        })
+
+        await bookingRepository.update(bookingId , {status : CANCELLED} , transaction) ;
+
+        await transaction.commit() ;
+    } catch (error) {
+        await transaction.rollback() ;
+        throw error ; // no need to send AppError ....because this cancelBooking function is call from the makePayments and from where
+                      // it is calling we are handling the error
+    }
+}
+
 module.exports = {
     createBooking,
     makePayments ,
