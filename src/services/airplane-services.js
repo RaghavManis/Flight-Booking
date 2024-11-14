@@ -2,7 +2,7 @@ const {AirplaneRepository} = require("../repositories");
 const {StatusCodes} = require("http-status-codes") ;
 const AppError = require("../utills/error/app-error") ;
 
-const airplaneRepository = new AirplaneRepository()
+const airplaneRepository = new AirplaneRepository() ;
 
 async function createAirplane(data){
     try {

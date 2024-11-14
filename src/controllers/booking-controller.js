@@ -6,13 +6,12 @@ const inMemDb = {};  // empty object (once created when server is started and li
 
 async function createBooking(req , res){
     try {
-        
         const booking = await BookingService.createBooking({
             flightId : req.body.flightId ,
             noOfSeats : req.body.noOfSeats ,
             userId : req.body.userId ,
         })
-        SuccessResponse.data = booking ;
+        SuccessResponse.data = booking ;   
         return res.status(StatusCodes.CREATED)
                   .json(SuccessResponse)
     } catch (error) {
@@ -57,8 +56,7 @@ async function makePayments(req ,res){
         return res.status(StatusCodes.OK)
                   .json(SuccessResponse)
     } catch (error) {
-        console.log("------>"+ error)
-        console.log("error in booking controller is ---> " + error.statusCode) ;
+        console.log("error in makePayments in booking controller is ---> " + error) ;
         ErrorResponse.error = error ;
         return res
                 .status(error.statusCode)        

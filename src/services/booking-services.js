@@ -1,6 +1,6 @@
 const axios = require("axios");
 const db = require("../models");
-const {ServerConfig} = require("../config") ;
+const {ServerConfig , Queue} = require("../config") ;
 const {AppError} = require("../utills/error") ;
 const {StatusCodes} = require("http-status-codes") ;
 const {BookingRepository} = require("../repositories") ;
@@ -15,6 +15,7 @@ async function createBooking(data){
     const transaction = await db.sequelize.transaction() ; // initialising the transaction 
     try {
         const flight = await axios.get(`${ServerConfig.FLIGHT_SERVICE}/api/get/flights/${data.flightId}`); // calling this api from the another server with the help of axios --> localhost:3000/api/get/flights/1 (in place of any id which is passed by user)
+        console.log("inside service try block") ;
         const flightData = flight.data.data ;
 
         if(data.noOfSeats > flightData.totalSeats){
@@ -82,8 +83,15 @@ async function makePayments(data){
         // now we assume that we are ready to make payment
         await bookingRepository.update(data.bookingId , {status : BOOKED} , transaction) ;
 
+        Queue.sendData({
+            recepientEmail: 'mnsyd24@gmail.com',
+            subject: 'Flight booked',
+            text: `Booking successfully done for the booking ${data.bookingId}`
+        });
+
         await transaction.commit() ;
         return bookingDetails ;
+        
     } catch (error) {
         console.log(error);
         console.log("error iniside make payment inside booking service is --> " + error ) ;
@@ -119,7 +127,7 @@ async function cancelBooking(bookingId){
 
 async function cancelOldBookings(){
     try {
-        const time = new Date(Date.now() - 1000 * 300) ; //date object before 5 minutes (1000 is mili second and 300 is in seconds )
+        const time = new Date(Date.now() - 1000 * 300) ; //date (date object) before 5 minutes (1000 is mili second and 300 is in seconds )
         const response = await bookingRepository.cancelOldBookings(time) ;
         return response ;
     } catch (error) {

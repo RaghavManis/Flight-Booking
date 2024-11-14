@@ -1,26 +1,90 @@
-const express = require("express") ;
-const {ServerConfig , Logger} = require("./config") ;
-const router = require("./routes") ;
-const CRON = require("./utills/common/cron-jobs") ;
-const app = express() ;
+// const amqplib = require("amqplib");
+// let connection; // Keep connection outside to close it later
 
-app.use(express.json()) ;
-app.use(express.urlencoded({extended:true})) ;
+// async function connectQueue() {
+//     try {
+//         connection = await amqplib.connect("amqp://localhost");  // This line connects to the RabbitMQ server running on localhost (the default location if you’re running RabbitMQ locally).
+//                                                                  // amqplib library is used to handle the connection between rabbitmq and node project
+//         const channel = await connection.createChannel(); // Channels are the paths through which messages are sent and received in RabbitMQ. Each channel is a virtual connection inside a TCP connection.
+//                                                           // Channels allow you to send and receive messages.
+        
+//         await channel.assertQueue("noti-queue"); 
+//         channel.sendToQueue("noti-queue" , Buffer.from(('okay, once more time'))) ;
+        
+//         // setInterval(() => {
+//         //     channel.sendToQueue("noti-queue" , Buffer.from(('something to do '))) ;
+//         // } , 1000) ;
 
-app.listen(ServerConfig.PORT , ()=>{
-    // console.log(process) ;
-    console.log(`server is succesfully started at port no ${ServerConfig.PORT}`) ;
-    // Logger.info("server succesfully started") ;
-    CRON() ;
-})
-// console.log("inside main index.js")
-app.use("/api" , router) ;
+//         // const queue = 'notification-queue';
+//         // const message = 'Hello, World!';   
+
+//         // await channel.assertQueue(queue, { durable: true });   // assertQueue checks if a queue with the given name (task_queue in this case) exists; if not, it creates one.
+//         //                                                        // durable: true ensures that the queue will survive RabbitMQ server restarts, which adds a layer of persistence.
+//         // channel.sendToQueue(queue, Buffer.from(message));   // sendToQueue is used to send a message to the specified queue.
+//                                                             // The message, which is a string ("Hello, World!"), is converted to a buffer (binary data) using Buffer.from() before sending, as RabbitMQ expects messages in binary format.
+ 
+//         // setTimeout(() => {              // This ensures that the connection is closed after a short delay, allowing the message to be sent fully before the process exits.
+//         //     connection.close();
+//         //     process.exit(0);      
+//         // }, 500); 
+
+//     } catch (error) {  
+//         console.log("Error inside connect queue in main index.js --> " + error);
+//     }
+// }
+////////////////////////////////////////    ABOVE CODE IS FOR TESTING NOTIFICATION SERVICE    ///////////////////////////////////////////////////////////////////////////
+const express = require("express");
+
+const { ServerConfig, Queue } = require("./config");
+const router = require("./routes");
+const CRON = require("./utills/common/cron-jobs"); // importing the function which will be responsible for the updating our server every 30 minutes for rejecting the booking which are not completed and of before 5 minute
+const app = express();
+// const sequelize = require("./config/database") ;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.listen(ServerConfig.PORT, async () => {
+    console.log(`Server is successfully started at port no ${ServerConfig.PORT}`);
+    CRON();  // for updating the server....see above explanation 
+    // await connectQueue(); // line of testing phase
+    await Queue.connectQueue() ;
+    console.log("Queue connected"); 
+    // // await sequelize.sync();
+});
+
+app.use("/api", router);
+
+
+ // BY USING THIS CODE TRYING TO CLOSE THE PREVIOUS INSTANCE OF SERVER AT SAME PORT BUT NOT SUCCECCED
+// async function shutdown() {
+//     if (server) {
+//         server.close(() => {
+//             console.log('Server process terminated');
+//         });
+//     }
+//     if (connection) {
+//         await connection.close();
+//         console.log('RabbitMQ connection closed');
+//     }
+// }
+
+// process.on('SIGTERM', shutdown);
+// process.on('SIGINT', shutdown); // Handle Ctrl+C gracefully      
+
+
+
+
+
+
+
+
 
 
 
 /**
     what is process and what is process.env ?
-
+  
     In Node.js, process is a global object that provides information and control over the current Node.js process.
     It is an instance of EventEmitter and contains a lot of useful properties and methods to interact with the environment in which the
     Node.js application is running.

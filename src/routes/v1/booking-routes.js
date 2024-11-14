@@ -1,7 +1,7 @@
 const express = require("express") ;
 const  router = express.Router() ;
-const {BookingController} = require("../../controllers") ;
-const {BookingMiddleware} = require("../../middlewares") ;
+const { BookingController } = require("../../controllers") ;
+const { BookingMiddleware } = require("../../middlewares") ;
 
 // console.log("inside airplane routes ")
 
